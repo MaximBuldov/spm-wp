@@ -1,6 +1,7 @@
 *
 
 !.gitignore
+!.guthub
 
 !wp-content/
 !wp-content/themes/
