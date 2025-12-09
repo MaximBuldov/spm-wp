@@ -1,7 +1,8 @@
 *
 
 !.gitignore
-!.guthub
+!.github
+!.github/**
 
 !wp-content/
 !wp-content/themes/
