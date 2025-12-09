@@ -34,7 +34,8 @@ add_filter('manage_edit-works_columns', function ($columns) {
 
 add_action('manage_works_posts_custom_column', function ($column, $post_id) {
     if ($column === 'post_id') {
-        echo $post_id;
+        $link = get_edit_post_link($post_id);
+        echo '<a href="' . esc_url($link) . '">' . (int) $post_id . '</a>';
     }
 }, 10, 2);
 
