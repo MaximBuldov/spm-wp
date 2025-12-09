@@ -50,7 +50,7 @@ function spm_rest_login( WP_REST_Request $request ) {
 			'truckFee' => intval(get_field('truckFee', 'option')),
 		);
 
-		$wp_users = get_users(['fields' => ['ID', 'display_name', 'user_email', 'user_login', 'acf', 'roles'],]);
+		$wp_users = get_users(['fields' => ['ID', 'display_name', 'user_email', 'user_login'],]);
 
     return [
 			'user' => array(
