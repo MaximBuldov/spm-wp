@@ -19,12 +19,21 @@ add_action( 'rest_after_insert_works', 'restSendEmail', 100, 3);
 add_action( 'react_sender_cron', 'sendReminder' );
 
 add_filter('manage_edit-works_columns', function ($columns) {
-    $columns['title'] = 'ID';
-    return $columns;
+    $new = [];
+
+    foreach ($columns as $key => $label) {
+        if ($key === 'title') {
+            $new['post_id'] = 'ID';
+        } else {
+            $new[$key] = $label;
+        }
+    }
+
+    return $new;
 });
 
 add_action('manage_works_posts_custom_column', function ($column, $post_id) {
-    if ($column === 'title') {
+    if ($column === 'post_id') {
         echo $post_id;
     }
 }, 10, 2);
