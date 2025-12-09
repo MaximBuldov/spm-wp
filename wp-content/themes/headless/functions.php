@@ -18,6 +18,17 @@ add_action( 'rest_after_insert_works', 'restSendEmail', 100, 3);
 
 add_action( 'react_sender_cron', 'sendReminder' );
 
+add_filter('manage_edit-works_columns', function ($columns) {
+    $columns['title'] = 'ID';
+    return $columns;
+});
+
+add_action('manage_works_posts_custom_column', function ($column, $post_id) {
+    if ($column === 'title') {
+        echo $post_id;
+    }
+}, 10, 2);
+
 function maximum_api_filter($query_params) {
     $query_params['per_page']["maximum"]=200;
     return $query_params;
