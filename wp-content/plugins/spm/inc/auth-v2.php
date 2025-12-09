@@ -13,6 +13,12 @@ add_action('rest_api_init', function () {
             return is_user_logged_in();
         },
     ]);
+
+		register_rest_route('spm/v1', '/logout', [
+			'methods'  => 'POST',
+			'callback' => 'spm_rest_logout',
+			'permission_callback' => '__return_true',
+	]);
 });
 
 function spm_rest_login( WP_REST_Request $request ) {
@@ -34,10 +40,7 @@ function spm_rest_login( WP_REST_Request $request ) {
     if ( is_wp_error($user) ) {
         return new WP_Error('invalid_credentials', 'Invalid login or password', ['status' => 401]);
     }
-
-    wp_set_current_user($user->ID);
-    wp_set_auth_cookie($user->ID, true, is_ssl());
-
+	
 		$site_options = array(
 			'price' => intval(get_field('price', 'option')),
 			'moverPrice' => intval(get_field('moverPrice', 'option')),
@@ -50,7 +53,21 @@ function spm_rest_login( WP_REST_Request $request ) {
 			'truckFee' => intval(get_field('truckFee', 'option')),
 		);
 
-		$wp_users = get_users(['fields' => ['ID', 'display_name', 'user_email', 'user_login'],]);
+		$raw_users = get_users([
+				'fields' => ['ID', 'display_name', 'user_email', 'user_login'],
+		]);
+
+		$wp_users = array_map(function( WP_User $u ) {
+			return [
+					'id'    => $u->ID,
+					'name'  => $u->display_name,
+					'email' => $u->user_email,
+					'login' => $u->user_login,
+					'roles' => $u->roles,
+					'phone' => get_field('phone', 'user_' . $u->ID),
+			];
+	}, $raw_users);
+
 
     return [
 			'user' => array(
@@ -76,5 +93,13 @@ function spm_rest_me( WP_REST_Request $request ) {
         'name'  => $user->display_name,
         'email' => $user->user_email,
         'roles' => $user->roles,
+    ];
+}
+
+function spm_rest_logout( WP_REST_Request $request ) {
+    wp_clear_auth_cookie();
+    return [
+        'success' => true,
+        'message' => 'Logged out',
     ];
 }
