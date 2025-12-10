@@ -13,8 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'SPM_PATH', plugin_dir_path( __FILE__ ) );
 
 require SPM_PATH . 'inc/auth.php';
-require SPM_PATH . 'inc/auth-v2.php';
-require SPM_PATH . 'inc/auth-config.php';
 require SPM_PATH . 'inc/works.php';
 require SPM_PATH . 'inc/users.php';
 require SPM_PATH . 'inc/options.php';
