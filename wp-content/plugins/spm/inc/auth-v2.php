@@ -1,31 +1,5 @@
 <?php
 add_action('rest_api_init', function () {
-    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
-    add_filter('rest_pre_serve_request', 'spm_rest_cors', 15, 4);
-});
-
-function spm_rest_cors( $served, $result, $request, $server ) {
-    $allowed_origins = [
-				'http://localhost:3000',
-				'https://w.smartpeoplemoving.com',
-				'https://smartpeoplemoving.com'
-		];
-
-    $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-
-    if (in_array($origin, $allowed_origins, true)) {
-        header("Access-Control-Allow-Origin: {$origin}");
-        header('Access-Control-Allow-Credentials: true');
-        header('Vary: Origin');
-    }
-
-    header('Access-Control-Allow-Headers: Authorization, Content-Type');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-
-    return $served;
-}
-
-add_action('rest_api_init', function () {
     register_rest_route('spm/v1', '/login', [
         'methods'             => 'POST',
         'callback'            => 'spm_rest_login',
