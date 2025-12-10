@@ -23,7 +23,7 @@ function spm_rest_book( WP_REST_Request $request ) {
     ];
 
     $work_id = (int) $request->get_param('work');
-    $phone   = $request->get_param('phone');
+    $phone   = $request->get_param('token');
 
     if (empty($work_id) || empty($phone)) {
         return [
@@ -34,11 +34,10 @@ function spm_rest_book( WP_REST_Request $request ) {
     $post = get_post($work_id);
 
     if (!$post || $post->post_type !== 'works') {
-        return new WP_Error(
-            'not_found',
-            'Work not found',
-            [ 'status' => 404 ]
-        );
+        return [
+            'prices' => $prices,
+            'work'   => null
+        ];
     }
 
     $ci = get_field('customer_info', $work_id) ?: [];
