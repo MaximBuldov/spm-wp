@@ -1,6 +1,6 @@
 <?php
 add_action('rest_api_init', function () {
-    register_rest_route('spm/v1', '/login', [
+    register_rest_route('', 'spm/v1/login', [
         'methods'             => 'POST',
         'callback'            => 'spm_rest_login',
         'permission_callback' => '__return_true',
