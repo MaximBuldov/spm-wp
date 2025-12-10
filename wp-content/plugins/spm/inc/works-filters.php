@@ -52,7 +52,7 @@ add_filter( 'rest_works_query', function( $args ) {
         if ( isset( $_GET['notpending'] ) ) {
             $args['meta_query'][] = array(
                 'key'     => 'state',
-                'value'   => array( 'pending', 'quote' ),
+                'value'   => array( 'pending', 'quote', 'lost' ),
                 'compare' => 'NOT IN',
             );
         }
