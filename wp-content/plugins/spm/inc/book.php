@@ -43,16 +43,11 @@ function spm_rest_book( WP_REST_Request $request ) {
     $ci = get_field('customer_info', $work_id) ?: [];
     $phone_from_wp = isset($ci['customer_phone']) ? (string) $ci['customer_phone'] : '';
 
-    $normalize = function($p) {
-        return preg_replace('/\D+/', '', (string) $p);
-    };
-
-    if ($normalize($phone) !== $normalize($phone_from_wp)) {
-        return new WP_Error(
-            'forbidden',
-            'Phone does not match',
-            [ 'status' => 403 ]
-        );
+    if ($phone !== $phone_from_wp) {
+        return [
+            'prices' => $prices,
+            'work'   => null
+        ];
     }
 
     $watched = get_field('watched', $work_id);
@@ -61,24 +56,12 @@ function spm_rest_book( WP_REST_Request $request ) {
         $watched = true;
     }
 
-    $acf = get_fields($work_id) ?: [];
-
-    $work_data = [
-        'id'     => $post->ID,
-        'author' => (int) $post->post_author,
-        'date'   => $post->post_date,
-        'acf'    => [
-            'customer_info' => $acf['customer_info'] ?? null,
-            'date'          => $acf['date'] ?? null,
-            'state'         => $acf['state'] ?? null,
-            'watched'       => $watched,
-            'paid'          => $acf['paid'] ?? null,
-            'deposit'       => $acf['deposit'] ?? null,
-        ],
-    ];
+    $controller = new WP_REST_Posts_Controller('works');
+    $response   = $controller->prepare_item_for_response($post, $request);
+    $data       = $controller->prepare_response_for_collection($response);
 
     return [
         'prices' => $prices,
-        'work'   => $post
+        'work'   => $data
     ];
 }
