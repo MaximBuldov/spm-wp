@@ -34,7 +34,7 @@ add_filter('rest_authentication_errors', function ($result) {
         return $result;
     }
 
-    $allowed = ['/spm/v1/login', '/spm/v3/login'];
+    $allowed = ['/spm/v1/login', '/spm/v3/login', 'spm/v2/login'];
 
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
 
