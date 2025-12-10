@@ -2,7 +2,7 @@
 add_action('rest_api_init', function () {
 
     register_rest_route('spm/v1', '/book', [
-        'methods'  => 'GET',
+        'methods'  => 'POST',
         'callback' => 'spm_rest_book',
         'permission_callback' => '__return_true',
     ]);
