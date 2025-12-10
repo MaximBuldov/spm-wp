@@ -67,32 +67,32 @@ function spm_rest_login( WP_REST_Request $request ) {
         return new WP_Error('invalid_credentials', 'Invalid login or password', ['status' => 401]);
     }
 	
-		$site_options = array(
-			'price' => intval(get_field('price', 'option')),
-			'moverPrice' => intval(get_field('moverPrice', 'option')),
-			'nonCashPrice' => intval(get_field('nonCashPrice', 'option')),
-			'weekendPrice' => intval(get_field('weekendPrice', 'option')),
-			'smallBox' => intval(get_field('smallBox', 'option')),
-			'mediumBox' => intval(get_field('mediumBox', 'option')),
-			'wrappingPaper' => intval(get_field('wrappingPaper', 'option')),
-			'heavyItems' => intval(get_field('heavyItems', 'option')),
-			'truckFee' => intval(get_field('truckFee', 'option')),
-		);
+		// $site_options = array(
+		// 	'price' => intval(get_field('price', 'option')),
+		// 	'moverPrice' => intval(get_field('moverPrice', 'option')),
+		// 	'nonCashPrice' => intval(get_field('nonCashPrice', 'option')),
+		// 	'weekendPrice' => intval(get_field('weekendPrice', 'option')),
+		// 	'smallBox' => intval(get_field('smallBox', 'option')),
+		// 	'mediumBox' => intval(get_field('mediumBox', 'option')),
+		// 	'wrappingPaper' => intval(get_field('wrappingPaper', 'option')),
+		// 	'heavyItems' => intval(get_field('heavyItems', 'option')),
+		// 	'truckFee' => intval(get_field('truckFee', 'option')),
+		// );
 
-		$raw_users = get_users([
-				'fields' => ['ID', 'display_name', 'user_email', 'user_login'],
-		]);
+	// 	$raw_users = get_users([
+	// 			'fields' => ['ID', 'display_name', 'user_email', 'user_login'],
+	// 	]);
 
-		$wp_users = array_map(function( WP_User $u ) {
-			return [
-					'id'    => $u->ID,
-					'name'  => $u->display_name,
-					'email' => $u->user_email,
-					'login' => $u->user_login,
-					'roles' => $u->roles,
-					'phone' => get_field('phone', 'user_' . $u->ID),
-			];
-	}, $raw_users);
+	// 	$wp_users = array_map(function( WP_User $u ) {
+	// 		return [
+	// 				'id'    => $u->ID,
+	// 				'name'  => $u->display_name,
+	// 				'email' => $u->user_email,
+	// 				'login' => $u->user_login,
+	// 				'roles' => $u->roles,
+	// 				'phone' => get_field('phone', 'user_' . $u->ID),
+	// 		];
+	// }, $raw_users);
 
 
     return [
@@ -103,8 +103,8 @@ function spm_rest_login( WP_REST_Request $request ) {
 				'id' => $user->ID,
 				'role' => $user->roles
 			),
-			'prices' => $site_options,
-			'users' => $wp_users
+			// 'prices' => $site_options,
+			// 'users' => $wp_users
     ];
 }
 
