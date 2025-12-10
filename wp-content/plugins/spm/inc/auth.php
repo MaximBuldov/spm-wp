@@ -60,6 +60,7 @@ add_filter( 'rest_authentication_errors', function( $result ) {
     $public_routes = [
         '/wp-json/jwt-auth/v1/token',
         '/wp-json/jwt-auth/v1/token/validate',
+        '/wp-json/spm/v1/book',
     ];
 
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
