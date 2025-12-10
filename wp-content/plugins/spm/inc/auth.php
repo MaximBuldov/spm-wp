@@ -34,9 +34,50 @@ function add_email_to_rest_api($response, $user, $request) {
 
 add_filter('rest_prepare_user', 'add_email_to_rest_api', 10, 3);
 
-function custom_users_rest_api( $args ) {
-    $args['who'] = ''; // Remove restriction
-    return $args;
-}
+add_filter( 'rest_user_query', function( $args, $request ) {
+    if ( ! is_user_logged_in() ) {
+        return $args;
+    }
 
-add_filter( 'rest_user_query', 'custom_users_rest_api' );
+    $args['who'] = '';
+
+    return $args;
+}, 10, 2 );
+
+add_filter( 'rest_authentication_errors', function( $result ) {
+    if ( ! empty( $result ) ) {
+        return $result;
+    }
+
+    if ( is_user_logged_in() ) {
+        return $result;
+    }
+
+    if ( 'OPTIONS' === $_SERVER['REQUEST_METHOD'] ) {
+        return $result;
+    }
+
+    $public_routes = [
+        '/wp-json/jwt-auth/v1/token',
+        '/wp-json/jwt-auth/v1/token/validate',
+    ];
+
+    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+
+    foreach ( $public_routes as $route ) {
+        if ( strpos( $request_uri, $route ) === 0 ) {
+            return $result;
+        }
+    }
+
+    $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if ( stripos( $auth, 'Bearer ' ) === 0 ) {
+        return $result;
+    }
+
+    return new WP_Error(
+        'rest_forbidden',
+        'REST API is restricted.',
+        [ 'status' => 401 ]
+    );
+}, 99 );
