@@ -1,12 +1,12 @@
 <?php
 add_action('rest_api_init', function () {
-    register_rest_route('spm/v3', '/login', [
+    register_rest_route('spm/v1', '/login', [
         'methods'             => 'POST',
         'callback'            => 'spm_rest_login',
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('spm/v2', '/me', [
+    register_rest_route('spm/v1', '/me', [
         'methods'             => 'GET',
         'callback'            => 'spm_rest_me',
         'permission_callback' => function () {
@@ -101,3 +101,26 @@ function spm_rest_logout( WP_REST_Request $request ) {
         'message' => 'Logged out',
     ];
 }
+
+add_action(
+    'set_logged_in_cookie',
+    function( $logged_in_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
+        $domain = parse_url( home_url(), PHP_URL_HOST );
+        $secure = is_ssl();
+
+        setcookie(
+            LOGGED_IN_COOKIE,
+            $logged_in_cookie,
+            [
+                'expires'  => $expire,
+                'path'     => '/',
+                'domain'   => $domain,
+                'secure'   => $secure,
+                'httponly' => true,
+                'samesite' => 'None',
+            ]
+        );
+    },
+    10,
+    6
+);
