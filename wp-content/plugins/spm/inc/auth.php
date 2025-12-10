@@ -60,23 +60,14 @@ add_filter( 'rest_authentication_errors', function( $result ) {
     $public_routes = [
         '/wp-json/jwt-auth/v1/token',
         '/wp-json/jwt-auth/v1/token/validate',
-        '/wp-json/spm/v1/book',
     ];
 
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-    $request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
     foreach ( $public_routes as $route ) {
         if ( strpos( $request_uri, $route ) === 0 ) {
             return $result;
         }
-    }
-
-    if (
-        $request_method === 'POST'
-        && strpos( $request_uri, '/wp-json/wp/v2/works' ) === 0
-    ) {
-        return $result;
     }
 
     $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';

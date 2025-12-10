@@ -13,8 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'SPM_PATH', plugin_dir_path( __FILE__ ) );
 
 require SPM_PATH . 'inc/auth.php';
-require SPM_PATH . 'inc/book.php';
-require SPM_PATH . 'inc/works.php';
+require SPM_PATH . 'inc/works-filters.php';
 require SPM_PATH . 'inc/users.php';
 require SPM_PATH . 'inc/options.php';
 require SPM_PATH . 'inc/works-search-endpoint.php';
