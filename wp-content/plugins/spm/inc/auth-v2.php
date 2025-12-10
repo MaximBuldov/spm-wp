@@ -6,7 +6,7 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true',
     ]);
 
-    register_rest_route('spm/v1', '/me', [
+    register_rest_route('spm/v2', '/me', [
         'methods'             => 'GET',
         'callback'            => 'spm_rest_me',
         'permission_callback' => function () {
