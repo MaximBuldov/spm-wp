@@ -56,12 +56,24 @@ function spm_rest_book( WP_REST_Request $request ) {
         $watched = true;
     }
 
-    $controller = new WP_REST_Posts_Controller('works');
-    $response   = $controller->prepare_item_for_response($post, $request);
-    $data       = $controller->prepare_response_for_collection($response);
+    $acf = get_fields($work_id) ?: [];
+
+    $work_data = [
+        'id'     => $post->ID,
+        'author' => (int) $post->post_author,
+        'date'   => $post->post_date,
+        'acf'    => [
+            'customer_info' => $acf['customer_info'] ?? null,
+            'date'          => $acf['date'] ?? null,
+            'state'         => $acf['state'] ?? null,
+            'watched'       => $watched,
+            'paid'          => $acf['paid'] ?? null,
+            'deposit'       => $acf['deposit'] ?? null,
+        ],
+    ];
 
     return [
         'prices' => $prices,
-        'work'   => $data
+        'work'   => $work_data
     ];
 }
