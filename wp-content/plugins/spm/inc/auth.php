@@ -64,11 +64,19 @@ add_filter( 'rest_authentication_errors', function( $result ) {
     ];
 
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+    $request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
     foreach ( $public_routes as $route ) {
         if ( strpos( $request_uri, $route ) === 0 ) {
             return $result;
         }
+    }
+
+    if (
+        $request_method === 'POST'
+        && strpos( $request_uri, '/wp-json/wp/v2/works' ) === 0
+    ) {
+        return $result;
     }
 
     $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
