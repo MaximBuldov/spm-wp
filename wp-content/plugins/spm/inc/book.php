@@ -79,6 +79,6 @@ function spm_rest_book( WP_REST_Request $request ) {
 
     return [
         'prices' => $prices,
-        'work'   => $work_data
+        'work'   => $post
     ];
 }
