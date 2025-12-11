@@ -75,3 +75,16 @@ add_filter( 'rest_works_query', function( $args ) {
 
   return $args;
 });
+
+add_action('rest_after_insert_works', function( $post, $request, $creating ) {
+    if ( $creating ) {
+        return;
+    }
+
+    $method = $request->get_method();
+    if ( $method !== 'PUT' && $method !== 'PATCH' ) {
+        return;
+    }
+
+    wp_save_post_revision( $post->ID );
+}, 5, 3);
