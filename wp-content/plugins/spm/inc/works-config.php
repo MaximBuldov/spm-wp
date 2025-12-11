@@ -1,49 +1,36 @@
 <?php
-add_action('rest_after_insert_works', function ( $post, $request, $creating ) {
+add_filter('rest_pre_insert_works', function( $prepared_post, $request, $creating ) {
+    $method  = $request->get_method();
+    $post_id = isset($prepared_post->ID) ? (int) $prepared_post->ID : 0;
 
-    $method = $request->get_method();
-    $route  = method_exists($request, 'get_route') ? $request->get_route() : '';
+    error_log(
+        '[rest_pre_insert_works] creating=' . (int) $creating .
+        ' method=' . $method .
+        ' post_id=' . $post_id
+    );
 
-    error_log('[SPM_REV] rest_after_insert_works');
-    error_log('[SPM_REV] creating=' . (int)$creating . ' method=' . $method . ' route=' . $route . ' post_id=' . $post->ID);
-
-    // We only want updates, not creation
     if ( $creating ) {
-        error_log('[SPM_REV] skipped (creating=true)');
-        return;
+        error_log('[rest_pre_insert_works] skip: creating');
+        return $prepared_post;
     }
 
-    // Only for PUT / PATCH
     if ( $method !== 'PUT' && $method !== 'PATCH' ) {
-        error_log('[SPM_REV] skipped (method)');
-        return;
+        error_log('[rest_pre_insert_works] skip: method not PUT/PATCH');
+        return $prepared_post;
     }
 
-    // Safety
-    if ( wp_is_post_revision( $post->ID ) ) {
-        error_log('[SPM_REV] skipped (is revision)');
-        return;
+    if ( ! $post_id ) {
+        error_log('[rest_pre_insert_works] skip: no post_id in prepared_post');
+        return $prepared_post;
     }
 
-    // Create revision
-    $rev_id = wp_save_post_revision( $post->ID );
-
-    if ( $rev_id ) {
-        error_log('[SPM_REV] revision created id=' . $rev_id);
-    } else {
-        error_log('[SPM_REV] revision NOT created');
+    if ( wp_is_post_revision( $post_id ) ) {
+        error_log('[rest_pre_insert_works] skip: is revision');
+        return $prepared_post;
     }
 
-}, 20, 3);
+    error_log('[rest_pre_insert_works] calling wp_save_post_revision for post ' . $post_id);
+    wp_save_post_revision( $post_id );
 
-add_action('acf/save_post', function ( $post_id ) {
-
-    if ( ! is_numeric($post_id) ) return;
-    if ( wp_is_post_revision($post_id) ) return;
-
-    $type = get_post_type($post_id);
-    if ( $type !== 'works' ) return;
-
-    error_log('[SPM_REV] acf/save_post post_id=' . $post_id);
-
-}, 5);
+    return $prepared_post;
+}, 10, 3);
