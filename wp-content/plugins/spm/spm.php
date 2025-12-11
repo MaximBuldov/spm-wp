@@ -17,3 +17,4 @@ require SPM_PATH . 'inc/works-filters.php';
 require SPM_PATH . 'inc/users.php';
 require SPM_PATH . 'inc/options.php';
 require SPM_PATH . 'inc/works-search-endpoint.php';
+require SPM_PATH . 'inc/works-config.php';
