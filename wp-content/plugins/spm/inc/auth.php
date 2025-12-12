@@ -34,7 +34,7 @@ function modify_token_response($data, $user) {
 			'role' => get_userdata($user->ID)->roles
 		),
 		'prices' => $site_options,
-        'users' => $users,
+        'workers' => $users,
 	);
 
 	return $res;
