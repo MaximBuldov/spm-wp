@@ -1,13 +1,13 @@
 <?php
 add_action('rest_after_insert_works', function ( $post, $request, $creating ) {
-    if ( $creating ) {
-        return;
-    }
+    // if ( $creating ) {
+    //     return;
+    // }
 
-    $method = $request->get_method();
-    if ( $method !== 'PUT' && $method !== 'PATCH' ) {
-        return;
-    }
+    // $method = $request->get_method();
+    // if ( $method !== 'PUT' && $method !== 'PATCH' ) {
+    //     return;
+    // }
 
     $post_id = (int) $post->ID;
 
