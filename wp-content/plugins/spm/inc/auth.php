@@ -10,7 +10,20 @@ function modify_token_response($data, $user) {
 		'wrappingPaper' => intval(get_field('wrappingPaper', 'option')),
 		'heavyItems' => intval(get_field('heavyItems', 'option')),
 		'truckFee' => intval(get_field('truckFee', 'option')),
-);
+    );
+
+    $users = array_map(
+    function ( WP_User $u ) {
+        return [
+            'id'    => $u->ID,
+            'name'  => $u->display_name,
+            'email' => $u->user_email,
+            'roles' => $u->roles,
+            'phone' => get_field('phone', 'user_' . $u->ID),
+        ];
+    },
+    get_users()
+	);
 	$res = array(
     'token' => $data['token'],
 		'user' => array(
@@ -20,7 +33,8 @@ function modify_token_response($data, $user) {
 			'id' => $user->ID,
 			'role' => get_userdata($user->ID)->roles
 		),
-		'prices' => $site_options
+		'prices' => $site_options,
+        'users' => $users,
 	);
 
 	return $res;
