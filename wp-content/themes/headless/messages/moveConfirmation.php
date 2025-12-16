@@ -38,11 +38,23 @@ function moveConfirmationEmail($post) {
   $url = spm_get_url( $post, $phone );
 
   $subject = 'Move confirmation | Smart People Moving';
+  $paid    = (bool) get_field('paid', $post);
+  $deposit = get_field('deposit', $post);
+  $hasDeposit = $deposit !== null && $deposit !== '' && floatval($deposit) > 0;
+
+  $depositBlock = '';
+  if (!$paid && $hasDeposit) {
+    $depositBlock =
+      '<p><strong>Deposit required:</strong> Submit your deposit securely to reserve your crew, truck, and exact time slot on our schedule.</p>'
+    . '<p>This payment simply holds your booking and is fully refundable as long as you contact us at least 24 hours before your scheduled moving date to make changes or cancel.</p>';
+  }
+
 
   $message = '<html><body>'
-    . '<p>Hello ' . esc_html($name) . '! Thank you for choosing Smart People Moving! '
+    . '<p>Hi ' . esc_html($name) . '! This is Smart People Moving quote you have requested '
     . 'To confirm your booking request please fill out the form by clicking the link below.</p>'
     . '<p><a href="' . esc_url($url) . '">Confirm Move</a></p>'
+    . $depositBlock
     . '<p>If you have any questions or concerns please contact us at '
     . '<a href="tel:4158399391">(415) 839-9391</a></p>'
     . '<p>The Smart People Moving Team</p>'
@@ -64,9 +76,21 @@ function moveConfirmationSms($post, $client, $twilio_number) {
 
   $url = spm_get_url( $post, $phone );
 
-  $message = "Hello {$name}! Thank you for choosing Smart People Moving! "
+  $paid    = (bool) get_field('paid', $post);
+  $deposit = get_field('deposit', $post);
+  $hasDeposit = $deposit !== null && $deposit !== '' && floatval($deposit) > 0;
+
+  $depositBlock = '';
+  if (!$paid && $hasDeposit) {
+    $depositBlock =
+      "\nSubmit your deposit securely to reserve your crew, truck, and exact time slot on our schedule.\n"
+    . "This payment simply holds your booking and is fully refundable as long as you contact us at least 24 hours before your scheduled moving date to make changes or cancel.\n";
+  }
+
+  $message = "Hi {$name}! This is Smart People Moving quote you've requested "
     . "To confirm your booking request please open the link below:\n"
     . "{$url}\n"
+    . $depositBlock
     . "If you have any questions or concerns please contact us at (415) 839-9391\n"
     . "The Smart People Moving Team";
 

@@ -1,23 +1,23 @@
 <?php
 add_action('rest_after_insert_works', function ( $post, $request, $creating ) {
-    // if ( $creating ) {
-    //     return;
-    // }
-
-    // $method = $request->get_method();
-    // if ( $method !== 'PUT' && $method !== 'PATCH' ) {
-    //     return;
-    // }
-
     $post_id = (int) $post->ID;
 
-    if ( ! $post_id || wp_is_post_revision( $post_id ) ) {
+    $snapshot = [
+        'acf'    => function_exists('get_fields') ? (get_fields($post_id) ?: []) : [],
+    ];
+
+    $history_id = wp_insert_post([
+        'post_type'   => 'history',
+        'post_status' => 'publish',
+        'post_title'  => 'Work #' . $post_id . ' snapshot',
+        'post_author' => get_current_user_id() ?: 0,
+    ], true);
+
+    if ( is_wp_error($history_id) ) {
+        error_log('[SPM_HISTORY] failed to create history post for work '.$post_id.': '.$history_id->get_error_message());
         return;
     }
 
-    $rev_id = wp_save_post_revision( $post_id );
-
-    if ( ! $rev_id && function_exists('_wp_put_post_revision') ) {
-        _wp_put_post_revision( $post_id );
-    }
+    update_field('work_id', $post_id, $history_id);
+    update_field('snapshot', wp_json_encode($snapshot), $history_id);
 }, 20, 3);
