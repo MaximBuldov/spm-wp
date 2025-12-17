@@ -15,6 +15,7 @@ if ( ! defined( '_S_VERSION' ) ) {
 
 
 add_action( 'rest_after_insert_works', 'restSendEmail', 100, 3);
+add_action( 'rest_after_insert_followup', 'restSendFolloup', 100, 3);
 
 add_action( 'react_sender_cron', 'sendReminder' );
 
