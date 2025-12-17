@@ -4,6 +4,7 @@ require get_template_directory() . '/messages/moveCompleted.php';
 require get_template_directory() . '/messages/moveConfirmed.php';
 require get_template_directory() . '/messages/assignWorkers.php';
 require get_template_directory() . '/messages/workerConfirmedJob.php';
+require get_template_directory() . '/messages/followup.php';
 
 require get_template_directory() . '/twillio/src/Twilio/autoload.php';
 use Twilio\Rest\Client;
@@ -122,5 +123,34 @@ function sendReminder() {
     error_log('Twilio Reminder Error: ' . $e->getMessage());
   } catch (Exception $e) {
     error_log('General Reminder Error: ' . $e->getMessage());
+  }
+}
+
+function restSendFolloup($post, $request, $creating) {
+  if (empty($post) || empty($post->ID)) return;
+  $work_id    = get_field('work_id', $post);
+  $message   = get_field('message', $post);
+
+  if ( ! $work_id ) return;
+  $customer_info = get_field('customer_info', $work_id);
+
+  if ( empty($customer_info) ) return;
+  $phone = $customer_info['customer_phone'] ?? null;
+  $email = $customer_info['customer_email'] ?? null;
+
+  try {
+    $client         = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
+    $twilio_number  = TWILLIO_PHONE;
+
+    if($email) {
+      followupEmail($email, $message);
+    }
+    if($phone) {
+      followupSms($client, $twilio_number, $phone, $message);
+    }
+  } catch (\Twilio\Exceptions\RestException $e) {
+    error_log('Twilio Error: ' . $e->getMessage());
+  } catch (Exception $e) {
+    error_log('General Error: ' . $e->getMessage());
   }
 }
