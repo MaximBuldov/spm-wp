@@ -41,25 +41,38 @@ function spm_build($post, $opts = []) {
   $safe = fn($s) => $H ? esc_html($s) : $s;
 
   // addresses
-  $addr = function($list, $label) use ($H, $safe) {
-    if (empty($list) || !is_array($list)) return '';
-    $out = '';
-    foreach ($list as $row) {
-      $a = $row['full_address'] ?? '';
-      $u = $row['unit'] ?? '';
-      if (!$a && !$u) continue;
-      if ($H) {
-        $url = esc_url('https://maps.google.com/?q='.rawurlencode($a));
-        $out .= sprintf(
-          "%s: <a rel='noreferrer' target='_blank' href='%s'>%s</a>%s<br />\n",
-          esc_html($label), $url, esc_html($a), $u ? ', Unit: '.esc_html($u) : ''
-        );
-      } else {
-        $out .= $label.': '.$a.($u ? ', Unit: '.$u : '')."\n";
-      }
+$addr = function($list, $label) use ($H, $safe) {
+  if (empty($list) || !is_array($list)) return '';
+  $out = '';
+
+  foreach ($list as $row) {
+    $a = $row['full_address'] ?? '';
+    $u = $row['unit'] ?? '';
+    $z = $row['zip'] ?? '';
+
+    if (!$a && !$u && !$z) continue;
+
+    $suffix = [];
+    if ($u) $suffix[] = 'Unit: ' . ($H ? esc_html($u) : $u);
+    if ($z) $suffix[] = 'ZIP: ' . ($H ? esc_html($z) : $z);
+    $suffix = $suffix ? ', ' . implode(', ', $suffix) : '';
+
+    if ($H) {
+      $url = esc_url('https://maps.google.com/?q=' . rawurlencode(trim("$a $z")));
+      $out .= sprintf(
+        "%s: <a rel='noreferrer' target='_blank' href='%s'>%s</a>%s<br />\n",
+        esc_html($label),
+        $url,
+        esc_html($a),
+        $suffix
+      );
+    } else {
+      $out .= $label . ': ' . $a . $suffix . "\n";
     }
-    return $out;
-  };
+  }
+
+  return $out;
+};
 
   // supplies
   $supplies = '';

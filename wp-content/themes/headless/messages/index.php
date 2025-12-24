@@ -131,7 +131,9 @@ function restSendFolloup($post, $request, $creating) {
   $work_id    = get_field('work_id', $post);
   $message   = get_field('message', $post);
 
-  if ( ! $work_id ) return;
+  if ( !$work_id ) {
+    return;
+  };
   $customer_info = get_field('customer_info', $work_id);
 
   if ( empty($customer_info) ) return;
