@@ -15,17 +15,13 @@ function restSendEmail($post, $request, $creating) {
   $foreman_info   = get_field('foreman_info', $post) ?: [];
 
   $confirmed_notified = get_post_meta( $post->ID, '_confirmed_notified', true );
+  $foreman_notified = get_post_meta( $post->ID, '_foreman_notified', true );
 
   try {
     $client         = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
     $twilio_number  = TWILLIO_PHONE;
 
     switch ($state) {
-      case 'pending':
-        moveConfirmationEmail($post);
-        moveConfirmationSms($post, $client, $twilio_number);
-        break;
-
       case 'quote':
         if($creating) {
           moveConfirmationSms($post, $client, $twilio_number);
@@ -47,7 +43,7 @@ function restSendEmail($post, $request, $creating) {
         break;
 
       case 'assignWorkers':
-        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'pending') {
+        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'assignWorkers' && !$foreman_notified) {
           assignWorkersSms($post, $client, $twilio_number);
         }
         if (!empty($foreman_info['status']) && $foreman_info['status'] === 'confirmed') {
