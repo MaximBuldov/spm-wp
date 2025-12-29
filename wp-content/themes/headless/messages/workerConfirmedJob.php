@@ -6,7 +6,6 @@ function workerConfirmedJobSms($post, $client, $twilio_number) {
   $fields = get_field('foreman_info', $post->ID);
   if (empty($fields['workers']) || !is_array($fields['workers'])) return;
 
-  // Find the worker with role "foreman"
   $arr       = $fields['workers'];
   $found_key = array_search('foreman', array_column($arr, 'worker_role'));
   if ($found_key === false || empty($arr[$found_key]['worker'])) return;
@@ -17,7 +16,8 @@ function workerConfirmedJobSms($post, $client, $twilio_number) {
 
   $message = sprintf('%s confirmed job #%d at %s', $user_name, intval($post->ID), $date);
 
-  $phone = '+15105667471';
+  // $phone = '+15105667471';
+  $phone = '+1619496877';
 
   try {
     $client->messages->create($phone, array(

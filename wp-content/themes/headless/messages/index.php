@@ -16,6 +16,7 @@ function restSendEmail($post, $request, $creating) {
 
   $confirmed_notified = get_post_meta( $post->ID, '_confirmed_notified', true );
   $foreman_notified = get_post_meta( $post->ID, '_foreman_notified', true );
+  $admin_notified_about_foreman = get_post_meta( $post->ID, 'admin_notified_about_foreman', true );
 
   try {
     $client         = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
@@ -45,9 +46,11 @@ function restSendEmail($post, $request, $creating) {
       case 'assignWorkers':
         if (!empty($foreman_info['status']) && $foreman_info['status'] === 'assignWorkers' && !$foreman_notified) {
           assignWorkersSms($post, $client, $twilio_number);
+          update_post_meta( $post->ID, '_foreman_notified', 1 );
         }
-        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'confirmed') {
+        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'confirmed' && !$admin_notified_about_foreman) {
           workerConfirmedJobSms($post, $client, $twilio_number);
+          update_post_meta( $post->ID, '_admin_notified_about_foreman', 1 );
         }
         break;
     }
@@ -124,16 +127,37 @@ function sendReminder() {
 
 function restSendFolloup($post, $request, $creating) {
   if (empty($post) || empty($post->ID)) return;
-  $work_id    = get_field('work_id', $post);
+  $work_id    = get_field('work_id', $post) ?? null;
   $message   = get_field('message', $post);
+  $phone   = get_field('customer_phone', $post) ?? null;
 
-  if ( !$work_id ) {
-    return;
+  if (!$work_id && $phone) {
+      $q = new WP_Query([
+      'post_type'      => 'works',
+      'post_status'    => 'any',
+      'posts_per_page' => 1,
+      'orderby'        => 'date',
+      'order'          => 'DESC',
+      'fields'         => 'ids',
+      'meta_query'     => [
+        [
+          'key'     => 'customer_info_customer_phone',
+          'value'   => $phone,
+          'compare' => '='
+        ]
+      ],
+    ]);
+
+    if ( !empty($q->posts) ) {
+      $work = (int)$q->posts[0];
+      followup_notify_managers($work, $phone, $message);
+    }
+     wp_reset_postdata();
   };
+
   $customer_info = get_field('customer_info', $work_id);
 
   if ( empty($customer_info) ) return;
-  $phone = $customer_info['customer_phone'] ?? null;
   $email = $customer_info['customer_email'] ?? null;
 
   try {
