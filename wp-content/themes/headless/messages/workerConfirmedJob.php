@@ -17,7 +17,7 @@ function workerConfirmedJobSms($post, $client, $twilio_number) {
   $message = sprintf('%s confirmed job #%d at %s', $user_name, intval($post->ID), $date);
 
   // $phone = '+15105667471';
-  $phone = '+1619496877';
+  $phone = '+16194968777';
 
   try {
     $client->messages->create($phone, array(
