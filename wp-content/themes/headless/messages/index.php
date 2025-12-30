@@ -16,7 +16,7 @@ function restSendEmail($post, $request, $creating) {
 
   $confirmed_notified = get_post_meta( $post->ID, '_confirmed_notified', true );
   $foreman_notified = get_post_meta( $post->ID, '_foreman_notified', true );
-  $admin_notified_about_foreman = get_post_meta( $post->ID, 'admin_notified_about_foreman', true );
+  $admin_notified_about_foreman = get_post_meta( $post->ID, '_admin_notified_about_foreman', true );
 
   try {
     $client         = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
