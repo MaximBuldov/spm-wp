@@ -44,7 +44,7 @@ function restSendEmail($post, $request, $creating) {
         break;
 
       case 'assignWorkers':
-        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'assignWorkers' && !$foreman_notified) {
+        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'pending' && !$foreman_notified) {
           assignWorkersSms($post, $client, $twilio_number);
           update_post_meta( $post->ID, '_foreman_notified', 1 );
         }
