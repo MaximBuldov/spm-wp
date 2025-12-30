@@ -24,7 +24,7 @@ function followupSms($client, $twilio_number, $phone, $text) {
 function followup_notify_managers(int $work_id, ?string $from_phone, ?string $text): void {
   $from_phone = (string)($from_phone ?? '');
   $text = (string)($text ?? '');
-  $to = ['smart.people.move@gmail.com', 'maxbuldov@gmail.com'];
+  $to = ['smart.people.move@gmail.com'];
 
   if (!$to) return;
 
