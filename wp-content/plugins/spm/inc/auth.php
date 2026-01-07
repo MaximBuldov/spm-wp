@@ -10,6 +10,7 @@ function modify_token_response($data, $user) {
 		'wrappingPaper' => intval(get_field('wrappingPaper', 'option')),
 		'heavyItems' => intval(get_field('heavyItems', 'option')),
 		'truckFee' => intval(get_field('truckFee', 'option')),
+		'defaultdeposit' => intval(get_field('defaultdeposit', 'option')),
     );
 
     $users = array_map(
