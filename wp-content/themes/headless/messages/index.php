@@ -73,12 +73,20 @@ function sendReminder() {
     $query = new WP_Query([
       'post_type'      => 'works',
       'posts_per_page' => -1,
-      'meta_query'     => [[
-        'key'     => 'date',
-        'value'   => $today,
-        'compare' => '=',
-        'type'    => 'DATE'
-      ]],
+      'meta_query'     => [
+        'relation' => 'AND',
+        [
+          'key'     => 'date',
+          'value'   => $today,
+          'compare' => '=',
+          'type'    => 'DATE',
+        ],
+        [
+          'key'     => 'state',
+          'value'   => 'confirmed',
+          'compare' => '=',
+        ],
+      ],
     ]);
 
     if ($query->have_posts()) {
@@ -95,7 +103,7 @@ function sendReminder() {
             . '<p>Hi, your move is scheduled for the date / time listed below.</p>'
             . '<p>' . esc_html($date) . ' / ' . esc_html($time) . '</p>'
             . '<p>If you need to reschedule or have any questions, please call '
-            . '<a href="tel:+15105667471">(510) 566-7471</a>.</p>'
+            . '<a href="tel:+14158399391">(415) 839-9391</a>.</p>'
             . '<p>Thank you!</p>'
             . '<p>The Smart People Moving Team</p>'
             . '</body></html>';
@@ -106,7 +114,7 @@ function sendReminder() {
         if ($phone) {
           $msgSms = "Hi, your move is scheduled for the date / time listed below.\n"
             . "{$date} / {$time}\n"
-            . "If you need to reschedule or have any questions please call (510) 566-7471\n"
+            . "If you need to reschedule or have any questions please call (415) 839-9391\n"
             . "Thank you!\n"
             . "The Smart People Moving Team";
 
