@@ -77,7 +77,7 @@ function render_work_number_column($column, $post_id) {
 add_action('manage_work_posts_custom_column', 'render_work_number_column', 10, 2);
 
 function register_work_number_for_rest() {
-    register_post_meta('works', 'work_number', [
+    register_post_meta('works', 'work_id', [
         'show_in_rest'  => true,
         'single'        => true,
         'type'          => 'integer',
