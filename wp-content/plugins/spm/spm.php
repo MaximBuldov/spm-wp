@@ -21,3 +21,4 @@ require SPM_PATH . 'inc/works-config.php';
 require SPM_PATH . 'inc/history-filters.php';
 require SPM_PATH . 'inc/followup-filters.php';
 require SPM_PATH . 'inc/deactivate-user.php';
+require SPM_PATH . 'inc/work-id.php';
