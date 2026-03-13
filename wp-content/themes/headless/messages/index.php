@@ -95,13 +95,19 @@ function sendReminder() {
         $date          = get_field('date') ?: '';
         $ci            = get_field('customer_info') ?: [];
         $time          = isset($ci['time']) ? $ci['time'] : '';
+        $end_time      = isset($ci['end_time']) ? $ci['end_time'] : '';
         $email         = isset($ci['customer_email']) ? $ci['customer_email'] : '';
         $phone         = isset($ci['customer_phone']) ? $ci['customer_phone'] : '';
+
+        $timeframe = $time;
+        if ($end_time) {
+          $timeframe = $time . ' - ' . $end_time;
+        }
 
         if ($email) {
           $msgEmail = '<html><body>'
             . '<p>Hi, your move is scheduled for the date / time listed below.</p>'
-            . '<p>' . esc_html($date) . ' / ' . esc_html($time) . '</p>'
+            . '<p>' . esc_html($date) . ' / ' . esc_html($timeframe) . '</p>'
             . '<p>If you need to reschedule or have any questions, please call '
             . '<a href="tel:+14158399391">(415) 839-9391</a>.</p>'
             . '<p>Thank you!</p>'
@@ -113,7 +119,7 @@ function sendReminder() {
 
         if ($phone) {
           $msgSms = "Hi, your move is scheduled for the date / time listed below.\n"
-            . "{$date} / {$time}\n"
+            . "{$date} / {$timeframe}\n"
             . "If you need to reschedule or have any questions please call (415) 839-9391\n"
             . "Thank you!\n"
             . "The Smart People Moving Team";

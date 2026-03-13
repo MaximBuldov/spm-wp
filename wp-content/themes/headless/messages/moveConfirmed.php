@@ -21,11 +21,23 @@ function spm_build($post, $opts = []) {
   $get = fn($k, $d='') => isset($f[$k]) ? $f[$k] : $d;
   $nf  = fn($v) => number_format((float)$v, 2, '.', '');
 
-  // time label
-  $mapTime = ['07:00'=>'7–7:30am','08:00'=>'8–8:30am','09:00'=>'9–9:30am','10:00'=>'10–10:30am','11:00'=>'11–11:30am','12:00'=>'12–12:30pm','13:00'=>'1-1:30pm','14:00'=>'2-2:30pm','15:00'=>'3-3:30pm','16:00'=>'4-4:30pm','17:00'=>'5-5:30pm','18:00'=>'6-6:30pm','19:00'=>'7-7:30pm'];
-  $time     = $get('time');
-  $timeLbl  = $mapTime[$time] ?? '';
+  function format_time_12h($time) {
+      if (!$time) return '';
+      [$hours, $minutes] = explode(':', $time);
+      $hours = (int)$hours;
+      $minutes = (int)$minutes;
+      $period = $hours >= 12 ? 'pm' : 'am';
+      $h = $hours % 12 ?: 12;
+      return $minutes === 0 ? "{$h}{$period}" : "{$h}:{$minutes}{$period}";
+  }
 
+  $time     = $get('time');
+  $end_time = $get('end_time');
+
+  $timeLbl  = format_time_12h($time);
+  if ($end_time) {
+      $timeLbl .= ' – ' . format_time_12h($end_time);
+  }
   // rates
   $res = (float)$get('result', 0);
   $pay = $get('payment');
