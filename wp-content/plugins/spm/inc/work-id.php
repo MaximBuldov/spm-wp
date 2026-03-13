@@ -34,7 +34,7 @@ function migrate_old_works_numbers() {
     if (get_option('works_migration_done')) return;
     
     $works = get_posts([
-        'post_type'      => 'works', // ваш slug CPT
+        'post_type'      => 'works',
         'post_status'    => 'publish',
         'posts_per_page' => -1,
         'orderby'        => 'ID',
