@@ -21,7 +21,7 @@ function spm_build($post, $opts = []) {
   $get = fn($k, $d='') => isset($f[$k]) ? $f[$k] : $d;
   $nf  = fn($v) => number_format((float)$v, 2, '.', '');
 
-  function format_time_12h($time) {
+  function spm_format_time_12h($time) {
       if (!$time) return '';
       [$hours, $minutes] = explode(':', $time);
       $hours = (int)$hours;
@@ -34,9 +34,9 @@ function spm_build($post, $opts = []) {
   $time     = $get('time');
   $end_time = $get('end_time');
 
-  $timeLbl  = format_time_12h($time);
+  $timeLbl  = spm_format_time_12h($time);
   if ($end_time) {
-      $timeLbl .= ' – ' . format_time_12h($end_time);
+      $timeLbl .= ' – ' . spm_format_time_12h($end_time);
   }
   // rates
   $res = (float)$get('result', 0);
