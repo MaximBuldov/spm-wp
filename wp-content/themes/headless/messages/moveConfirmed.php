@@ -21,16 +21,6 @@ function spm_build($post, $opts = []) {
   $get = fn($k, $d='') => isset($f[$k]) ? $f[$k] : $d;
   $nf  = fn($v) => number_format((float)$v, 2, '.', '');
 
-  function spm_format_time_12h($time) {
-      if (!$time) return '';
-      [$hours, $minutes] = explode(':', $time);
-      $hours = (int)$hours;
-      $minutes = (int)$minutes;
-      $period = $hours >= 12 ? 'pm' : 'am';
-      $h = $hours % 12 ?: 12;
-      return $minutes === 0 ? "{$h}{$period}" : "{$h}:{$minutes}{$period}";
-  }
-
   $time     = $get('time');
   $end_time = $get('end_time');
 
@@ -192,4 +182,14 @@ function moveConfirmedSms($post, $client, $twilio_number) {
   $phone = $f['customer_phone'] ?? '';
   if (!$phone) return;
   $client->messages->create($phone, ['from'=>$twilio_number, 'body'=>spm_build($post, ['html'=>false,'client'=>true])]);
+}
+
+function spm_format_time_12h($time) {
+    if (!$time) return '';
+    [$hours, $minutes] = explode(':', $time);
+    $hours = (int)$hours;
+    $minutes = (int)$minutes;
+    $period = $hours >= 12 ? 'pm' : 'am';
+    $h = $hours % 12 ?: 12;
+    return $minutes === 0 ? "{$h}{$period}" : "{$h}:{$minutes}{$period}";
 }
