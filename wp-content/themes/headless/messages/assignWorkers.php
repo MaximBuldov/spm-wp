@@ -4,7 +4,7 @@ function assignWorkersSms($post, $client, $twilio_number) {
   $customer_info = get_field('customer_info', $post);
   $name = $customer_info['customer_name'];
   $foreman_info = get_field('foreman_info', $post);
-  $link = 'https://smartpeoplemoving.com/book.html';
+  $link = 'https://smartpeoplemoving.com/book';
   $message = "You have new job(s) scheduled.
 To confirm your job please clicking the link below and click the confirmation button.
 https://w.smartpeoplemoving.com/my-works/{$post->ID}

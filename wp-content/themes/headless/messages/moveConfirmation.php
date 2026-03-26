@@ -21,7 +21,7 @@ function spm_get_url( $post, string $token ): string {
             'work'  => $work_id,
             'token' => $token,
         ],
-        'https://smartpeoplemoving.com/book.html'
+        'https://smartpeoplemoving.com/book'
     );
 }
 
