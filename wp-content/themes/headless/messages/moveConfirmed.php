@@ -105,7 +105,7 @@ $addr = function($list, $label) use ($H, $safe) {
   // body core
   $core  = '';
   if ($o['client'] && $H) $core .= "<p>Thank you for choosing Smart People Moving!</p>\n";
-  $core .= $line('Request', '#'.intval($post->ID));
+  $core .= $line('Request', '#'.getWorkNumber($post));
   $core .= $line('Status', 'Confirmed');
   if ($area) $core .= $line('Area', $safe($area));
   $core .= $line('Move Date', $safe(get_field('date', $post) ?: ''));
@@ -192,4 +192,20 @@ function spm_format_time_12h($time) {
     $period = $hours >= 12 ? 'pm' : 'am';
     $h = $hours % 12 ?: 12;
     return $minutes === 0 ? "{$h}{$period}" : "{$h}:{$minutes}{$period}";
+}
+
+function getWorkNumber($post): string {
+    $newNumbersDate = new DateTime('2026-03-31');
+
+    if ($post) {
+        $date = get_post_meta($post->ID, 'date', true);
+        $moveDate = new DateTime($date);
+
+        if ($moveDate < $newNumbersDate) {
+            return (string) $post->ID;
+        } else {
+            return (string) get_post_meta($post->ID, 'work_id', true);
+        }
+    }
+    return '...';
 }
