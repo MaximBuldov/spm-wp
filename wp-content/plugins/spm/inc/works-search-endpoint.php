@@ -18,6 +18,7 @@ class Works_Search_Endpoint {
     const META_NAME  = 'customer_info_customer_name';
     const META_PHONE = 'customer_info_customer_phone';
     const META_EMAIL = 'customer_info_customer_email';
+    const META_WORK_ID = 'work_id';
 
     public static function init() {
         add_action( 'rest_api_init', [ __CLASS__, 'register_route' ] );
@@ -91,6 +92,11 @@ class Works_Search_Endpoint {
                 ],
                 [
                     'key'     => self::META_EMAIL,
+                    'value'   => $search,
+                    'compare' => 'LIKE',
+                ],
+                [
+                    'key'     => self::META_WORK_ID,
                     'value'   => $search,
                     'compare' => 'LIKE',
                 ],
