@@ -19,5 +19,5 @@ add_action('rest_after_insert_works', function ( $post, $request, $creating ) {
     }
 
     update_field('work_id', $post_id, $history_id);
-    update_field('snapshot', wp_json_encode($snapshot), $history_id);
+    update_post_meta($history_id, 'snapshot', wp_json_encode($snapshot));
 }, 20, 3);
