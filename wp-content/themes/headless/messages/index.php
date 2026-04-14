@@ -9,56 +9,74 @@ require get_template_directory() . '/messages/followup.php';
 require get_template_directory() . '/twillio/src/Twilio/autoload.php';
 use Twilio\Rest\Client;
 
+function safeSms(callable $fn): void {
+    try {
+        $fn();
+    } catch (\Twilio\Exceptions\RestException $e) {
+        error_log('Twilio Error: ' . $e->getMessage());
+    } catch (Exception $e) {
+        error_log('SMS Error: ' . $e->getMessage());
+    }
+}
+
+function safeEmail(callable $fn): void {
+    try {
+        $fn();
+    } catch (Exception $e) {
+        error_log('Email Error: ' . $e->getMessage());
+    }
+}
+
 function restSendEmail($post, $request, $creating) {
-  if (empty($post) || empty($post->ID)) return;
-  $state          = get_field('state', $post);
-  $foreman_info   = get_field('foreman_info', $post) ?: [];
+    if (empty($post) || empty($post->ID)) return;
 
-  $confirmed_notified = get_post_meta( $post->ID, '_confirmed_notified', true );
-  $foreman_notified = get_post_meta( $post->ID, '_foreman_notified', true );
-  $admin_notified_about_foreman = get_post_meta( $post->ID, '_admin_notified_about_foreman', true );
+    $state        = get_field('state', $post);
+    $foreman_info = get_field('foreman_info', $post) ?: [];
 
-  try {
-    $client         = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
-    $twilio_number  = TWILLIO_PHONE;
+    $confirmed_notified           = get_post_meta($post->ID, '_confirmed_notified', true);
+    $foreman_notified             = get_post_meta($post->ID, '_foreman_notified', true);
+    $admin_notified_about_foreman = get_post_meta($post->ID, '_admin_notified_about_foreman', true);
+
+    try {
+        $client        = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
+        $twilio_number = TWILLIO_PHONE;
+    } catch (Exception $e) {
+        error_log('Twilio Client Error: ' . $e->getMessage());
+        $client        = null;
+        $twilio_number = null;
+    }
 
     switch ($state) {
-      case 'quote':
-        if($creating) {
-          moveConfirmationSms($post, $client, $twilio_number);
-          moveConfirmationEmail($post);
-        }
-        break;
+        case 'quote':
+            if ($creating) {
+                if ($client) safeSms(fn() => moveConfirmationSms($post, $client, $twilio_number));
+                safeEmail(fn() => moveConfirmationEmail($post));
+            }
+            break;
 
-      case 'completed':
-        moveCompletedEmail($post);
-        break;
+        case 'completed':
+            safeEmail(fn() => moveCompletedEmail($post));
+            break;
 
-      case 'confirmed':
-        if (empty($foreman_info['truck']) && !$confirmed_notified) {
-          moveConfirmedEmail($post);
-          moveConfirmedSms($post, $client, $twilio_number);
+        case 'confirmed':
+            if (empty($foreman_info['truck']) && !$confirmed_notified) {
+                safeEmail(fn() => moveConfirmedEmail($post));
+                if ($client) safeSms(fn() => moveConfirmedSms($post, $client, $twilio_number));
+                update_post_meta($post->ID, '_confirmed_notified', 1);
+            }
+            break;
 
-          update_post_meta( $post->ID, '_confirmed_notified', 1 );
-        }
-        break;
-
-      case 'assignWorkers':
-        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'pending' && !$foreman_notified) {
-          assignWorkersSms($post, $client, $twilio_number);
-          update_post_meta( $post->ID, '_foreman_notified', 1 );
-        }
-        if (!empty($foreman_info['status']) && $foreman_info['status'] === 'confirmed' && !$admin_notified_about_foreman) {
-          workerConfirmedJobSms($post, $client, $twilio_number);
-          update_post_meta( $post->ID, '_admin_notified_about_foreman', 1 );
-        }
-        break;
+        case 'assignWorkers':
+            if (!empty($foreman_info['status']) && $foreman_info['status'] === 'pending' && !$foreman_notified) {
+                if ($client) safeSms(fn() => assignWorkersSms($post, $client, $twilio_number));
+                update_post_meta($post->ID, '_foreman_notified', 1);
+            }
+            if (!empty($foreman_info['status']) && $foreman_info['status'] === 'confirmed' && !$admin_notified_about_foreman) {
+                if ($client) safeSms(fn() => workerConfirmedJobSms($post, $client, $twilio_number));
+                update_post_meta($post->ID, '_admin_notified_about_foreman', 1);
+            }
+            break;
     }
-  } catch (\Twilio\Exceptions\RestException $e) {
-    error_log('Twilio Error: ' . $e->getMessage());
-  } catch (Exception $e) {
-    error_log('General Error: ' . $e->getMessage());
-  }
 }
 
 function sendReminder() {
