@@ -166,7 +166,7 @@ function moveConfirmedEmail($post) {
   $toEmail = $f['customer_email'] ?? '';
   $toName  = $f['customer_name']  ?? '';
   $area    = spm_area_from_zip($f);
-  $subject = sprintf('Order #%s | Smart People Moving%s', intval($post->ID), $area ? ' ['.$area.']' : '');
+  $subject = sprintf('Order #%s | Smart People Moving%s', getWorkNumber($post), $area ? ' ['.$area.']' : '');
   $headers = ['Content-Type: text/html; charset=UTF-8'];
 
   if ($toEmail) {
