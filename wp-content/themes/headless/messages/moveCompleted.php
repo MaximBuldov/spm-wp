@@ -1,4 +1,20 @@
 <?php
+function moveCompletedSms($post, $client, $twilio_number) {
+  if (empty($post) || empty($post->ID) || !$client || !$twilio_number) return;
+
+  $work_id = get_post_meta($post->ID, 'work_id', true);
+  $message = sprintf('Work #%s completed', $work_id ?: $post->ID);
+
+  try {
+    $client->messages->create('+15105667471', array(
+      'from' => $twilio_number,
+      'body' => $message
+    ));
+  } catch (Exception $e) {
+    error_log('Twilio SMS failed: ' . $e->getMessage());
+  }
+}
+
 function moveCompletedEmail($post) {
   if (empty($post) || empty($post->ID)) return;
 

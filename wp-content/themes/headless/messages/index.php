@@ -56,6 +56,7 @@ function restSendEmail($post, $request, $creating) {
 
         case 'completed':
             safeEmail(fn() => moveCompletedEmail($post));
+            if ($client) safeSms(fn() => moveCompletedSms($post, $client, $twilio_number));
             break;
 
         case 'confirmed':
