@@ -14,7 +14,8 @@ function workerConfirmedJobSms($post, $client, $twilio_number) {
   $user      = get_userdata($user_id);
   $user_name = $user && !empty($user->display_name) ? $user->display_name : 'Foreman';
 
-  $message = sprintf('%s confirmed job #%d at %s', $user_name, intval($post->ID), $date);
+  $job_number = get_post_meta($post->ID, 'work_id', true) ?: $post->ID;
+  $message = sprintf('%s confirmed job #%s at %s', $user_name, $job_number, $date);
 
   $phone = '+15105667471';
 

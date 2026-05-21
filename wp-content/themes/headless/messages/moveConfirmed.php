@@ -195,17 +195,8 @@ function spm_format_time_12h($time) {
 }
 
 function getWorkNumber($post): string {
-    $newNumbersDate = new DateTime('2026-03-31');
-
     if ($post) {
-        $date = get_post_meta($post->ID, 'date', true);
-        $moveDate = new DateTime($date);
-
-        if ($moveDate < $newNumbersDate) {
-            return (string) $post->ID;
-        } else {
-            return (string) get_post_meta($post->ID, 'work_id', true);
-        }
+        return (string) (get_post_meta($post->ID, 'work_id', true) ?: $post->ID);
     }
     return '...';
 }
