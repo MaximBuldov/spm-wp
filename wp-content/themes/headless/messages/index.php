@@ -182,11 +182,11 @@ function restSendFolloup($post, $request, $creating) {
     ]);
 
     if ( !empty($q->posts) ) {
-      $work = (int)$q->posts[0];
-      followup_notify_managers($work, $phone, $message);
+      $work_id = (int)$q->posts[0];
+      followup_notify_managers($work_id, $phone, $message);
     }
-     wp_reset_postdata();
-  };
+    wp_reset_postdata();
+  }
 
   $customer_info = get_field('customer_info', $work_id);
 

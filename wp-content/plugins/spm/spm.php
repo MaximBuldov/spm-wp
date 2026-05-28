@@ -22,3 +22,4 @@ require SPM_PATH . 'inc/history-filters.php';
 require SPM_PATH . 'inc/followup-filters.php';
 require SPM_PATH . 'inc/deactivate-user.php';
 require SPM_PATH . 'inc/work-id.php';
+require SPM_PATH . 'inc/request-logger.php';
