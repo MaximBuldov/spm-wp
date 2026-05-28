@@ -8,15 +8,6 @@ add_filter('rest_pre_dispatch', function ($result, $server, $request) {
 
     $GLOBALS['spm_req_start'] = microtime(true);
 
-    $body_keys = array_keys($request->get_json_params() ?? []);
-    error_log(sprintf(
-        '[SPM] %s %s | user_id=%d | fields=%s',
-        $request->get_method(),
-        $request->get_route(),
-        get_current_user_id(),
-        implode(',', $body_keys)
-    ));
-
     return $result;
 }, 10, 3);
 
@@ -25,21 +16,30 @@ add_filter('rest_post_dispatch', function ($result, $server, $request) {
         return $result;
     }
 
-    $ms = isset($GLOBALS['spm_req_start'])
+    if ($request->get_method() === 'OPTIONS') {
+        return $result;
+    }
+
+    $ms     = isset($GLOBALS['spm_req_start'])
         ? round((microtime(true) - $GLOBALS['spm_req_start']) * 1000)
         : '?';
-
     $status = $result->get_status();
+
+    $user_id = get_current_user_id();
+    $user    = $user_id ? get_userdata($user_id) : null;
+    $who     = $user ? sprintf('%s (id=%d)', $user->display_name, $user_id) : 'unauthenticated';
+
     error_log(sprintf(
-        '[SPM] %s %s → %d (%dms)',
+        '[SPM] %s %s | %s | → %d (%dms)',
         $request->get_method(),
         $request->get_route(),
+        $who,
         $status,
         $ms
     ));
 
     if ($status >= 400) {
-        error_log('[SPM] error response: ' . wp_json_encode($result->get_data()));
+        error_log('[SPM] error: ' . wp_json_encode($result->get_data()));
     }
 
     return $result;
