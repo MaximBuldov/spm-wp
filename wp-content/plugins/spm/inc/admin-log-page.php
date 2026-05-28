@@ -13,14 +13,28 @@ add_action('admin_menu', function () {
     );
 });
 
+function spm_convert_log_time(string $line): string {
+    $tz = new DateTimeZone('America/Los_Angeles');
+    return preg_replace_callback(
+        '/\[(\d{2}-\w+-\d{4} \d{2}:\d{2}:\d{2}) UTC\]/',
+        function ($m) use ($tz) {
+            $dt = new DateTime($m[1], new DateTimeZone('UTC'));
+            $dt->setTimezone($tz);
+            return '[' . $dt->format('d-M-Y H:i:s T') . ']';
+        },
+        $line
+    );
+}
+
 function spm_render_log_page(): void {
     $log_file = WP_CONTENT_DIR . '/debug.log';
     $lines    = [];
 
     if (file_exists($log_file)) {
         $all   = file($log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        $lines = array_filter($all, fn($l) => str_contains($l, '[SPM]'));
-        $lines = array_reverse(array_values($lines));
+        $lines = array_filter($all, fn($l) => str_contains($l, '[SPM]') && !str_contains($l, 'OPTIONS'));
+        $lines = array_map('spm_convert_log_time', array_values($lines));
+        $lines = array_reverse($lines);
     }
 
     $clear = isset($_POST['spm_clear_log']) && check_admin_referer('spm_clear_log');
@@ -45,11 +59,8 @@ function spm_render_log_page(): void {
                 <span style="color:#888">No SPM log entries yet.</span>
             <?php else: ?>
                 <?php foreach ($lines as $line):
-                    if (str_contains($line, '✗') || str_contains($line, 'error') || str_contains($line, '4') || str_contains($line, '5')) {
-                        $color = '#f48771';
-                    } else {
-                        $color = '#d4d4d4';
-                    }
+                    $is_error = (bool) preg_match('/→ [45]\d\d/', $line) || str_contains($line, 'error response');
+                    $color    = $is_error ? '#f48771' : '#d4d4d4';
                     ?>
                     <div style="color:<?= $color ?>;border-bottom:1px solid #2d2d2d;padding:4px 0">
                         <?= esc_html($line) ?>
