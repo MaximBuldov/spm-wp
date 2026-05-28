@@ -42,6 +42,80 @@ function modify_token_response($data, $user) {
 }
 add_filter('jwt_auth_token_before_dispatch', 'modify_token_response', 10, 2);
 
+add_filter('jwt_auth_expire', function () {
+    return time() + DAY_IN_SECONDS * 7;
+});
+
+add_action('rest_api_init', function () {
+    register_rest_route('spm/v1', '/renew-token', [
+        'methods'             => 'POST',
+        'callback'            => 'spm_handle_renew_token',
+        'permission_callback' => '__return_true',
+    ]);
+});
+
+function spm_jwt_verify(string $token): ?object {
+    if (!defined('JWT_AUTH_SECRET_KEY')) return null;
+
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return null;
+
+    [$header, $body, $sig] = $parts;
+    $expected = rtrim(strtr(base64_encode(hash_hmac('sha256', "$header.$body", JWT_AUTH_SECRET_KEY, true)), '+/', '-_'), '=');
+
+    if (!hash_equals($expected, $sig)) return null;
+
+    $payload = json_decode(base64_decode(strtr($body, '-_', '+/')));
+    if (!$payload || (isset($payload->exp) && $payload->exp < time())) return null;
+
+    return $payload;
+}
+
+function spm_jwt_encode(array $payload): ?string {
+    if (!defined('JWT_AUTH_SECRET_KEY')) return null;
+
+    $header = rtrim(strtr(base64_encode('{"alg":"HS256","typ":"JWT"}'), '+/', '-_'), '=');
+    $body   = rtrim(strtr(base64_encode(wp_json_encode($payload)), '+/', '-_'), '=');
+    $sig    = rtrim(strtr(base64_encode(hash_hmac('sha256', "$header.$body", JWT_AUTH_SECRET_KEY, true)), '+/', '-_'), '=');
+
+    return "$header.$body.$sig";
+}
+
+function spm_handle_renew_token(WP_REST_Request $request): WP_REST_Response {
+    $auth = $request->get_header('authorization') ?? '';
+
+    if (stripos($auth, 'Bearer ') !== 0) {
+        return new WP_REST_Response(['error' => 'No token'], 401);
+    }
+
+    $payload = spm_jwt_verify(trim(substr($auth, 7)));
+
+    if (!$payload) {
+        return new WP_REST_Response(['error' => 'Invalid or expired token'], 401);
+    }
+
+    $user_id = $payload->data->user->id ?? 0;
+
+    if (!get_userdata($user_id)) {
+        return new WP_REST_Response(['error' => 'User not found'], 401);
+    }
+
+    $issued_at = time();
+    $new_token = spm_jwt_encode([
+        'iss'  => get_bloginfo('url'),
+        'iat'  => $issued_at,
+        'nbf'  => $issued_at,
+        'exp'  => apply_filters('jwt_auth_expire', $issued_at + DAY_IN_SECONDS * 7),
+        'data' => ['user' => ['id' => $user_id]],
+    ]);
+
+    if (!$new_token) {
+        return new WP_REST_Response(['error' => 'Could not generate token'], 500);
+    }
+
+    return new WP_REST_Response(['token' => $new_token], 200);
+}
+
 function add_email_to_rest_api($response, $user, $request) {
     $response->data['email'] = $user->user_email;
     return $response;
