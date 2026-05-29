@@ -1,4 +1,30 @@
 <?php
+add_filter('rest_pre_insert_works', function ($prepared_post, $request) {
+    if (empty($prepared_post->ID)) {
+        return $prepared_post;
+    }
+
+    $acf       = $request->get_param('acf');
+    $new_state = $acf['state'] ?? null;
+
+    if ($new_state !== 'quote') {
+        return $prepared_post;
+    }
+
+    $current_state = get_field('state', $prepared_post->ID);
+    $locked_states = ['confirmed', 'assignWorkers', 'completed', 'lost'];
+
+    if (in_array($current_state, $locked_states, true)) {
+        return new WP_Error(
+            'state_transition_forbidden',
+            'Cannot revert work state back to quote from ' . $current_state,
+            ['status' => 400]
+        );
+    }
+
+    return $prepared_post;
+}, 10, 2);
+
 add_action('rest_after_insert_works', function ( $post, $request, $creating ) {
     $post_id = (int) $post->ID;
 
