@@ -18,6 +18,7 @@ add_action( 'rest_after_insert_works', 'restSendEmail', 100, 3);
 add_action( 'rest_after_insert_followup', 'restSendFolloup', 100, 3);
 
 add_action( 'react_sender_cron', 'sendReminder' );
+add_action( 'spm_quote_reminder_cron', 'sendQuoteReminder' );
 
 add_filter('manage_edit-works_columns', function ($columns) {
     $new = [];

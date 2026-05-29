@@ -158,6 +158,85 @@ function sendReminder() {
   }
 }
 
+function sendQuoteReminder() {
+    try {
+        $client        = new Client(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
+        $twilio_number = TWILLIO_PHONE;
+    } catch (Exception $e) {
+        error_log('Twilio Client Error: ' . $e->getMessage());
+        $client        = null;
+        $twilio_number = null;
+    }
+
+    $today = date('Y-m-d');
+
+    $query = new WP_Query([
+        'post_type'      => 'works',
+        'posts_per_page' => -1,
+        'meta_query'     => [
+            'relation' => 'AND',
+            [
+                'key'     => 'state',
+                'value'   => 'quote',
+                'compare' => '=',
+            ],
+            [
+                'key'     => 'date',
+                'value'   => $today,
+                'compare' => '>',
+                'type'    => 'DATE',
+            ],
+        ],
+    ]);
+
+    if (!$query->have_posts()) {
+        wp_reset_postdata();
+        return;
+    }
+
+    $headers = ['Content-Type: text/html; charset=UTF-8'];
+    $subject = 'Reminder for your upcoming move';
+
+    while ($query->have_posts()) {
+        $query->the_post();
+        $date     = get_field('date') ?: '';
+        $ci       = get_field('customer_info') ?: [];
+        $time     = $ci['time'] ?? '';
+        $end_time = $ci['end_time'] ?? '';
+        $email    = $ci['customer_email'] ?? '';
+        $phone    = $ci['customer_phone'] ?? '';
+        $name     = $ci['customer_name'] ?? '';
+
+        $formatted_date = $date ? date('m/d/Y', strtotime($date)) : $date;
+        $timeframe = $end_time ? "{$time} - {$end_time}" : $time;
+
+        if ($email) {
+            $to       = $name ? "{$name} <{$email}>" : $email;
+            $body_html = '<html><body>'
+                . '<p>Hi, your move is scheduled for the date / time listed below.</p>'
+                . '<p>' . esc_html($formatted_date) . ' / ' . esc_html($timeframe) . '</p>'
+                . '<p>If you need to reschedule or have any questions please reply &ldquo;YES&rdquo; to confirm, &ldquo;RESCHEDULE&rdquo; to reschedule or &ldquo;CANCEL&rdquo; to cancel your move. Please note that your deposit will be kept if the move is cancelled.</p>'
+                . '<p>The Smart People Moving Team</p>'
+                . '</body></html>';
+            safeEmail(fn() => wp_mail($to, $subject, $body_html, $headers));
+        }
+
+        if ($phone && $client) {
+            $body_sms = "Hi, your move is scheduled for the date / time listed below.\n"
+                . "{$formatted_date} / {$timeframe}\n"
+                . "If you need to reschedule or have any questions please reply \"YES\" to confirm, \"RESCHEDULE\" to reschedule or \"CANCEL\" to cancel your move. Please note that your deposit will be kept if the move is cancelled.\n"
+                . "The Smart People Moving Team";
+            safeSms(fn() => $client->messages->create($phone, [
+                'from' => $twilio_number,
+                'body' => $body_sms,
+            ]));
+        }
+
+    }
+
+    wp_reset_postdata();
+}
+
 function restSendFolloup($post, $request, $creating) {
   if (empty($post) || empty($post->ID)) return;
   $work_id    = get_field('work_id', $post) ?? null;
