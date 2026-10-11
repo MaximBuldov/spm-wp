@@ -262,7 +262,8 @@ function restSendFolloup($post, $request, $creating) {
 
     if ( !empty($q->posts) ) {
       $work_id = (int)$q->posts[0];
-      followup_notify_managers($work_id, $phone, $message);
+      $work_number = (int)(get_post_meta($work_id, 'work_id', true) ?: $work_id);
+      followup_notify_managers($work_number, $phone, $message);
     }
     wp_reset_postdata();
   }
